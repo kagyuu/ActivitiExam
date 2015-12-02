@@ -3,10 +3,10 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans   http://www.springframework.org/schema/beans/spring-beans.xsd">
  
   <!-- 3.2.processEngineConfiguration
-  Standalone app          : org.activiti.engine.impl.cfg.StandaloneProcessEngineConfiguration
-  Test (Use in-memory h2) : org.activiti.engine.impl.cfg.StandaloneInMemProcessEngineConfiguration
-  Spring integration      : org.activiti.spring.SpringProcessEngineConfiguration
-  Standalone app with JTA : org.activiti.engine.impl.cfg.JtaProcessEngineConfiguration
+  Stand alone app          : org.activiti.engine.impl.cfg.StandaloneProcessEngineConfiguration
+  Test (Use in-memory h2)  : org.activiti.engine.impl.cfg.StandaloneInMemProcessEngineConfiguration
+  Spring integration       : org.activiti.spring.SpringProcessEngineConfiguration
+  Stand alone app with JTA : org.activiti.engine.impl.cfg.JtaProcessEngineConfiguration
   -->
   <bean id="processEngineConfiguration"
   class="org.activiti.engine.impl.cfg.StandaloneInMemProcessEngineConfiguration">
