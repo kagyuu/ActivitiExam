@@ -3,6 +3,7 @@ package com.snail.exam;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngines;
 import org.activiti.engine.RepositoryService;
@@ -11,7 +12,6 @@ import org.activiti.engine.TaskService;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,14 +44,17 @@ public class MyProcess {
             //  <process id="vacationRequest" name="Vacation request" isExecutable="true">
             //               ^^^^^^^^^^^^^^^
             //    <startEvent id="request" activiti:initiator="employeeName">
-            //                    ^^^^^^^*1                    ^^^^^^^^^^^^ $employeeName = the applicant user name
+            //                    ^^^^^^^*1                    ^^^^^^^^^^^^ $employeeName = the user name
             //      <extensionElements>
-            //        <activiti:formProperty id="numberOfDays" name="Number of days" type="long" required="true"></activiti:formProperty>
+            //        <activiti:formProperty id="numberOfDays" name="Number of days" type="long" required="true">
             //                                   ^^^^^^^^^^^^                              ^^^^
-            //        <activiti:formProperty id="startDate" name="First day of holiday (dd-MM-yyy)" type="date" datePattern="dd-MM-yyyy hh:mm" required="true"></activiti:formProperty>
+            //        </activiti:formProperty>
+            //        <activiti:formProperty id="startDate" name="First day of holiday (dd-MM-yyy)" type="date"
             //                                   ^^^^^^^^^                                                ^^^^
-            //        <activiti:formProperty id="vacationMotivation" name="Motivation" type="string"></activiti:formProperty>
+            //        datePattern="dd-MM-yyyy hh:mm" required="true"></activiti:formProperty>
+            //        <activiti:formProperty id="vacationMotivation" name="Motivation" type="string">
             //                                   ^^^^^^^^^^^^^^^^^^                          ^^^^^^
+            //        </activiti:formProperty>
             //      </extensionElements>
             //    </startEvent>
             // <activiti:formProperty>
@@ -76,17 +79,19 @@ public class MyProcess {
                         , p.getProcessDefinitionKey());
             }
             
-            // ----- 4.3.3. Completing tasks (Reject or Accept)
+            // ----- 4.3.3. Completing tasks (Reject Request)
             //  VacationRequest.bpmn20.xml L11-21
             //  --------------------------------------------------------------------------
             //    <sequenceFlow id="flow1" sourceRef="request" targetRef="handleRequest"></sequenceFlow>
             //                                        ^^^^^^^*1           ^^^^^^^^^^^^^*2
             //    <userTask id="handleRequest" name="Handle vacation request" activiti:candidateGroups="management">
             //                  ^^^^^^^^^^^^^*2                                                         ^^^^^^^^^^
-            //      <documentation>${employeeName} would like to take ${numberOfDays} day(s) of vacation (Motivation: ${vacationMotivation}).</documentation>
+            //      <documentation>${employeeName} would like to take ${numberOfDays} day(s) of vacation
+            //      (Motivation: ${vacationMotivation}).</documentation>
             //      <extensionElements>
-            //        <activiti:formProperty id="vacationApproved" name="Do you approve this vacation" type="enum" required="true">
+            //        <activiti:formProperty id="vacationApproved" name="Do you approve this vacation" type="enum"
             //                                   ^^^^^^^^^^^^^^^^
+            //        required="true">
             //          <activiti:value id="true" name="Approve"></activiti:value>
             //          <activiti:value id="false" name="Reject"></activiti:value>
             //        </activiti:formProperty>
@@ -94,7 +99,7 @@ public class MyProcess {
             //                                   ^^^^^^^^^^^^^^^^^
             //      </extensionElements>
             //    </userTask>
-            log.info("--- #3. Completing tasks (Reject or Accept)");
+            log.info("--- #3. Completing tasks (Reject Request)");
             
             // Fetch all tasks for the management group
             TaskService taskService = processEngine.getTaskService();
@@ -103,18 +108,51 @@ public class MyProcess {
                 if (task.getProcessDefinitionId().startsWith("vacationRequest")){
                     if (task.getTaskDefinitionKey().equals("handleRequest")) {
                         // Description is <documentation>.
-                        log.info("DO TASK [{}]", task.getDescription());
+                        log.info("TASK REJECT REQ [{}]", task.getDescription());
                         
                         // Do task (reject application)
                          Map<String, Object> taskVariables = new HashMap<String, Object>();
                          taskVariables.put("vacationApproved", "false");
                          taskVariables.put("managerMotivation", "We have a tight deadline!");
                          taskService.complete(task.getId(), taskVariables);
-                         
-                        log.info(ReflectionToStringBuilder.reflectionToString(task));
                     }
                 }
             }
+            
+            // ----- 4.3.3. Completing tasks (Adjust rejected request)
+			//  VacationRequest.bpmn20.xml L22-23
+			//  --------------------------------------------------------------------------
+			//  <sequenceFlow id="flow2" sourceRef="handleRequest" targetRef="requestApprovedDecision"></sequenceFlow>
+			//                                      ^^^^^^^^^^^^^*2           ^^^^^^^^^^^^^^^^^^^^^^^*3
+			//  <exclusiveGateway id="requestApprovedDecision" name="Request approved?"></exclusiveGateway>
+			//                        ^^^^^^^^^^^^^^^^^^^^^^^*3
+			//
+			//  VacationRequest.bpmn20.xml L30-35
+			//  --------------------------------------------------------------------------
+			//  <sequenceFlow id="flow5" name="denied" sourceRef="requestApprovedDecision" targetRef="adjustVacationRequestTask">
+			//                                                    ^^^^^^^^^^^^^^^^^^^^^^^*3           ^^^^^^^^^^^^^^^^^^^^^^^^^*4
+			//            <conditionExpression xsi:type="tFormalExpression"><![CDATA[${vacationApproved == 'false'}]]>
+			//                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            //            </conditionExpression>
+			//  </sequenceFlow>
+			//  <userTask id="adjustVacationRequestTask" name="Adjust vacation request" activiti:assignee="${employeeName}">
+			//                ^^^^^^^^^^^^^^^^^^^^^^^^^*4
+			//            <documentation>Your manager has disapproved your vacation request for ${numberOfDays} days.
+			//              Reason: ${managerMotivation}</documentation>
+            log.info("--- #4. Completing tasks (Adjust rejected request)");
+
+            taskService = processEngine.getTaskService();
+            tasks = taskService.createTaskQuery().active().list();
+            for (Task task : tasks) {
+                if (task.getProcessDefinitionId().startsWith("vacationRequest")){
+                    if (task.getTaskDefinitionKey().equals("adjustVacationRequestTask")) {
+                        // Description is <documentation>.
+                        log.info("ADJUST REJECT REQ [{}]", task.getDescription());
+                    }
+                }
+            }
+            
+
         } catch (Throwable th) {
             log.error("ERROR", th);
         }
