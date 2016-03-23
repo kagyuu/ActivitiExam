@@ -33,9 +33,9 @@
                          is needed if run on win.
     -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <withJansi>true</withJansi>
+        <withJansi>false</withJansi>
         <encoder>
-            <pattern>%date{yy-MM-dd HH:mm:ss} [%thread] %-5level %logger%n  %msg %n%n</pattern>
+            <pattern>%date{yy-MM-dd HH:mm:ss} [%-5level] %msg %n</pattern>
         </encoder>
     </appender>
  
