@@ -32,9 +32,15 @@
     -->
  
     <!-- 3.9-3.11 Job Executor
+    By default, the JobExecutor is activated when the process engine boots.
+    By default, the AsyncExecutor is not enabled and the JobExecutor is used
+    due to legacy reasons.
+    It's however recommended to use the new AsyncExecutor instead.
+    -->
+    <!--
     <property name="jobExecutorActivate" value="false" />
     <property name="asyncExecutorEnabled" value="true" />
-    <property name="asyncExecutorActivate" value="false" />
+    <property name="asyncExecutorActivate" value="true" />
     -->
  
     <!-- 3.12. Mail Configuration (for email task)
