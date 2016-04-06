@@ -44,6 +44,17 @@
     -->
  
     <!-- 3.12. Mail Configuration (for email task)
+    |======================|=======================|    
+    |property name         | Default value         |
+    |======================|=======================|
+    |mailServerHost        | localhost             |
+    |mailServerPort        | 25                    |
+    |mailServerDefaultFrom | activiti@activiti.org |
+    |mailServerUsername    | (not set)             |
+    |mailServerPassword    | (not set)             |
+    |mailServerUseSSL      | (not set)             |
+    |mailServerUseTLS      | (not set)             |
+    |======================|=======================|    
     <property name="mailServerHost" value="mail.my-corp.com" />
     <property name="mailServerPort" value="5025" />
     -->
