@@ -54,10 +54,10 @@
     |mailServerPassword    | (not set)             |
     |mailServerUseSSL      | (not set)             |
     |mailServerUseTLS      | (not set)             |
-    |======================|=======================|    
-    <property name="mailServerHost" value="mail.my-corp.com" />
-    <property name="mailServerPort" value="5025" />
+    |======================|=======================|
     -->
+    <property name="mailServerHost" value="localhost" />
+    <property name="mailServerPort" value="50025" />
  
     <!-- 3.13. History (for logging task execution)
     <property name="history" value="audit" />
