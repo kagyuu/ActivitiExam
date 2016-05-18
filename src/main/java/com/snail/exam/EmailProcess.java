@@ -8,7 +8,7 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MyProcess3 {
+public class EmailProcess {
 
     private static final Logger log = LoggerFactory.getLogger(MyProcess.class);
 
